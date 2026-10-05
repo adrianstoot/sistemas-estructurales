@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIV_L3 • Sistemas Estructurales</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              950: '#07090e',
+              900: '#0c0f17',
+              850: '#121722',
+              800: '#181f2e',
+              700: '#263147'
+            },
+            accent: {
+              gold: '#eab308',
+              amber: '#f59e0b',
+              sky: '#38bdf8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Font Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #07090e;
+      color: #f1f5f9;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Smooth Scrollbar for Filmstrip */
+    .filmstrip::-webkit-scrollbar {
+      height: 6px;
+    }
+    .filmstrip::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .filmstrip::-webkit-scrollbar-thumb {
+      background: #263147;
+      border-radius: 9999px;
+    }
+    .filmstrip::-webkit-scrollbar-thumb:hover {
+      background: #3b4b6b;
+    }
+    /* Minimal Glass */
+    .glass-ui {
+      background: rgba(12, 15, 23, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    /* Slide Frame Transition */
+    .slide-img {
+      transition: opacity 0.2s ease, transform 0.25s ease;
+    }
+    /* Light Mode */
+    body.light-mode {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    body.light-mode .glass-ui {
+      background: rgba(255, 255, 255, 0.88);
+      border-color: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    }
+    body.light-mode .text-slate-400 {
+      color: #64748b;
+    }
+    body.light-mode .bg-surface-900,
+    body.light-mode .bg-surface-950,
+    body.light-mode .bg-surface-850 {
+      background-color: #ffffff;
+    }
+    body.light-mode .border-surface-800,
+    body.light-mode .border-surface-700 {
+      border-color: #e2e8f0;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col justify-between">
+
+  <!-- ============================================== -->
+  <!-- 1. TOP MINIMALIST APP BAR                      -->
+  <!-- ============================================== -->
+  <header class="h-14 px-4 sm:px-6 flex items-center justify-between glass-ui border-b border-white/5 z-30 shrink-0">
+    
+    <!-- Left: Brand / Course Pill -->
+    <div class="flex items-center gap-3">
+      <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+      <div class="flex items-baseline gap-2">
+        <h1 class="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-2">
+          CIV_L3
+          <span class="text-xs font-normal text-slate-400 hidden sm:inline">• Sistemas Estructurales</span>
+        </h1>
+      </div>
+      <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/10 hidden md:inline">
+        E.T.S.I.E.
+      </span>
+    </div>
+
+    <!-- Center: Chapter Selector Pills -->
+    <div class="hidden lg:flex items-center gap-1 bg-surface-950/80 p-1 rounded-full border border-white/5 text-xs font-medium" id="chapterPillsContainer">
+      <!-- Injected by JS -->
+    </div>
+
+    <!-- Right: Quick Tools -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Chapter Mobile Dropdown -->
+      <select id="chapterMobileSelect" class="lg:hidden text-xs bg-surface-850 border border-white/10 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none">
+        <!-- Injected by JS -->
+      </select>
+
+      <!-- TEST BUTTON (HERO ACTION) -->
+      <button 
+        id="openTestBtn" 
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-semibold text-xs transition-all shadow-lg shadow-amber-500/20 active:scale-95">
+        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+        <span>Tipo Test</span>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button 
+        id="fullscreenBtn" 
+        title="Pantalla Completa (F)"
+        class="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-colors">
+        <i data-lucide="maximize" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button 
+        id="themeToggleBtn" 
+        title="Alternar Tema"
+        class="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-colors">
+        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+        <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+      </button>
+    </div>
+
+  </header>
+
+
+  <!-- ============================================== -->
+  <!-- 2. MAIN SLIDE STAGE (TAL CUAL)                 -->
+  <!-- ============================================== -->
+  <main class="flex-1 relative flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+    
+    <!-- Central Slide Display Container (16:9 Aspect Ratio) -->
+    <div class="relative w-full max-w-6xl max-h-full aspect-[16/9] flex items-center justify-center rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/60 group">
+      
+      <!-- Slide Image (Tal cual) -->
+      <img 
+        id="mainSlideImg" 
+        src="slides/slide_01.jpg" 
+        alt="Diapositiva CIV_L3" 
+        class="slide-img w-full h-full object-contain pointer-events-auto"
+      />
+
+      <!-- Previous Slide Trigger Button -->
+      <button 
+        id="prevSlideBtn" 
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full glass-ui border border-white/10 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-105 active:scale-95 shadow-xl hover:bg-white/10"
+        title="Diapositiva Anterior (←)">
+        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Next Slide Trigger Button -->
+      <button 
+        id="nextSlideBtn" 
+        class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full glass-ui border border-white/10 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-105 active:scale-95 shadow-xl hover:bg-white/10"
+        title="Diapositiva Siguiente (→)">
+        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Minimalist Slide Counter (Bottom Right Inside Frame) -->
+      <div class="absolute bottom-3 right-3 px-2.5 py-1 rounded-full glass-ui text-[11px] font-mono text-slate-300 pointer-events-none flex items-center gap-1.5 border border-white/10">
+        <span id="currentSlideNum" class="text-amber-400 font-bold">01</span>
+        <span class="text-slate-500">/</span>
+        <span>49</span>
+      </div>
+
+      <!-- Quick Chapter Tag (Bottom Left Inside Frame) -->
+      <div id="slideChapterTag" class="absolute bottom-3 left-3 px-3 py-1 rounded-full glass-ui text-xs font-medium text-slate-300 pointer-events-none border border-white/10">
+        1. Introducción & Perfiles
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ============================================== -->
+  <!-- 3. BOTTOM MINIMALIST FILMSTRIP (THUMBNAILS)   -->
+  <!-- ============================================== -->
+  <footer class="h-24 px-4 py-2 glass-ui border-t border-white/5 flex items-center gap-3 shrink-0 z-20">
+    
+    <!-- Filmstrip Scroll Container -->
+    <div id="filmstripContainer" class="filmstrip flex items-center gap-2.5 overflow-x-auto w-full h-full py-1 scroll-smooth">
+      <!-- 49 Miniatures injected by JS -->
+    </div>
+
+  </footer>
+
+
+  <!-- ============================================== -->
+  <!-- 4. MODAL MINIMALISTA TIPO TEST                -->
+  <!-- ============================================== -->
+  <div id="testModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-lg glass-ui rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
+      
+      <!-- Close Button -->
+      <button id="closeTestBtn" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/5 transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Test Header -->
+      <div class="space-y-1">
+        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+          <span class="text-amber-400 font-semibold uppercase tracking-wider">Test de Evaluación Rápida</span>
+          <span id="quizCounter">1 / 10</span>
+        </div>
+        <h3 id="quizQuestion" class="text-base sm:text-lg font-bold text-white leading-snug pt-1">
+          Cargando pregunta...
+        </h3>
+        <!-- Progress bar -->
+        <div class="w-full h-1.5 bg-surface-800 rounded-full overflow-hidden mt-3">
+          <div id="quizProgressBar" class="h-full bg-amber-400 transition-all duration-300" style="width: 10%;"></div>
+        </div>
+      </div>
+
+      <!-- Test Options -->
+      <div id="quizOptions" class="space-y-2.5">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Instant Feedback Box -->
+      <div id="quizFeedback" class="hidden p-3.5 rounded-2xl text-xs space-y-1 transition-all">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Modal Footer / Navigation -->
+      <div class="flex items-center justify-between pt-2 border-t border-white/5">
+        <button id="quizJumpSlideBtn" class="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1 font-medium transition-colors">
+          <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+          <span>Ver diapositiva de referencia</span>
+        </button>
+
+        <button id="quizNextBtn" class="px-4 py-2 rounded-full bg-white text-black font-semibold text-xs hover:bg-slate-200 transition-all active:scale-95 flex items-center gap-1.5 opacity-50 pointer-events-none">
+          <span>Siguiente</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Test Completed View -->
+      <div id="quizSummaryBox" class="hidden text-center py-4 space-y-4">
+        <div class="w-14 h-14 rounded-full bg-amber-400/20 text-amber-400 mx-auto flex items-center justify-center text-xl font-bold border border-amber-400/30">
+          ✓
+        </div>
+        <div>
+          <h4 class="text-xl font-bold text-white">¡Test Finalizado!</h4>
+          <p id="quizScoreReport" class="text-xs text-slate-300 mt-1">
+            Has acertado 8 de 10 preguntas.
+          </p>
+        </div>
+        <button id="quizRestartBtn" class="px-5 py-2 rounded-full bg-amber-400 text-black font-semibold text-xs hover:bg-amber-300 transition-all">
+          Reiniciar Test
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="slides_data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+
+      let currentSlide = 1;
+      const totalSlides = PRESENTATION.totalSlides;
+
+      // DOM Elements
+      const mainSlideImg = document.getElementById('mainSlideImg');
+      const currentSlideNum = document.getElementById('currentSlideNum');
+      const slideChapterTag = document.getElementById('slideChapterTag');
+      const prevSlideBtn = document.getElementById('prevSlideBtn');
+      const nextSlideBtn = document.getElementById('nextSlideBtn');
+      const filmstripContainer = document.getElementById('filmstripContainer');
+      const chapterPillsContainer = document.getElementById('chapterPillsContainer');
+      const chapterMobileSelect = document.getElementById('chapterMobileSelect');
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+      // Test Modal Elements
+      const openTestBtn = document.getElementById('openTestBtn');
+      const testModal = document.getElementById('testModal');
+      const closeTestBtn = document.getElementById('closeTestBtn');
+      const quizCounter = document.getElementById('quizCounter');
+      const quizQuestion = document.getElementById('quizQuestion');
+      const quizOptions = document.getElementById('quizOptions');
+      const quizFeedback = document.getElementById('quizFeedback');
+      const quizNextBtn = document.getElementById('quizNextBtn');
+      const quizJumpSlideBtn = document.getElementById('quizJumpSlideBtn');
+      const quizProgressBar = document.getElementById('quizProgressBar');
+      const quizSummaryBox = document.getElementById('quizSummaryBox');
+      const quizScoreReport = document.getElementById('quizScoreReport');
+      const quizRestartBtn = document.getElementById('quizRestartBtn');
+
+      let quizIdx = 0;
+      let quizScore = 0;
+      let quizAnswered = false;
+
+      // 1. Build Chapter Pills
+      PRESENTATION.chapters.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.className = `chapter-pill px-3 py-1 rounded-full text-slate-400 hover:text-white transition-all whitespace-nowrap`;
+        btn.textContent = ch.name;
+        btn.addEventListener('click', () => {
+          goToSlide(ch.slideStart);
+        });
+        chapterPillsContainer.appendChild(btn);
+
+        // Mobile option
+        const opt = document.createElement('option');
+        opt.value = ch.slideStart;
+        opt.textContent = ch.name;
+        chapterMobileSelect.appendChild(opt);
+      });
+
+      chapterMobileSelect.addEventListener('change', (e) => {
+        goToSlide(parseInt(e.target.value));
+      });
+
+      // 2. Build Thumbnails (Filmstrip)
+      for (let i = 1; i <= totalSlides; i++) {
+        const thumb = document.createElement('button');
+        thumb.className = `filmstrip-thumb relative shrink-0 h-16 aspect-[16/9] rounded-lg overflow-hidden border border-white/10 hover:border-amber-400/80 transition-all ${i === 1 ? 'ring-2 ring-amber-400' : 'opacity-70 hover:opacity-100'}`;
+        thumb.dataset.slide = i;
+        thumb.innerHTML = `
+          <img src="slides/slide_${String(i).padStart(2, '0')}.jpg" alt="Slide ${i}" class="w-full h-full object-cover" loading="lazy" />
+          <span class="absolute bottom-1 right-1 text-[9px] font-mono bg-black/75 px-1 py-0.2 rounded text-white">${i}</span>
+        `;
+        thumb.addEventListener('click', () => {
+          goToSlide(i);
+        });
+        filmstripContainer.appendChild(thumb);
+      }
+
+      // 3. Navigation
+      function goToSlide(num) {
+        if (num < 1 || num > totalSlides) return;
+        currentSlide = num;
+        
+        // Update main image with fade
+        mainSlideImg.style.opacity = '0.5';
+        setTimeout(() => {
+          mainSlideImg.src = `slides/slide_${String(num).padStart(2, '0')}.jpg`;
+          mainSlideImg.style.opacity = '1';
+        }, 60);
+
+        // Update counter
+        currentSlideNum.textContent = String(num).padStart(2, '0');
+
+        // Update chapter tag & active pill
+        const ch = PRESENTATION.chapters.find(c => num >= c.range[0] && num <= c.range[1]);
+        if (ch) {
+          slideChapterTag.textContent = ch.name;
+          const pills = chapterPillsContainer.querySelectorAll('.chapter-pill');
+          pills.forEach((p, idx) => {
+            if (idx === ch.id - 1) {
+              p.className = 'chapter-pill px-3 py-1 rounded-full bg-white/10 text-amber-400 font-semibold transition-all whitespace-nowrap';
+            } else {
+              p.className = 'chapter-pill px-3 py-1 rounded-full text-slate-400 hover:text-white transition-all whitespace-nowrap';
+            }
+          });
+          chapterMobileSelect.value = ch.slideStart;
+        }
+
+        // Highlight thumbnail
+        const thumbs = filmstripContainer.querySelectorAll('.filmstrip-thumb');
+        thumbs.forEach((t, idx) => {
+          if (idx + 1 === num) {
+            t.className = 'filmstrip-thumb relative shrink-0 h-16 aspect-[16/9] rounded-lg overflow-hidden border border-amber-400 ring-2 ring-amber-400 transition-all opacity-100';
+            t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } else {
+            t.className = 'filmstrip-thumb relative shrink-0 h-16 aspect-[16/9] rounded-lg overflow-hidden border border-white/10 hover:border-amber-400/80 transition-all opacity-70 hover:opacity-100';
+          }
+        });
+      }
+
+      prevSlideBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+      nextSlideBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+
+      // Keyboard Controls
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+        if (e.key === 'ArrowRight' || e.key === ' ') goToSlide(currentSlide + 1);
+        if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+        if (e.key === 'Escape') closeQuiz();
+      });
+
+      // Fullscreen Toggle
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+      fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+      // Theme Toggle
+      themeToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        document.documentElement.classList.toggle('dark');
+      });
+
+      // 4. QUIZ LOGIC
+      function openQuiz() {
+        testModal.classList.remove('hidden');
+        renderQuiz();
+      }
+
+      function closeQuiz() {
+        testModal.classList.add('hidden');
+      }
+
+      openTestBtn.addEventListener('click', openQuiz);
+      closeTestBtn.addEventListener('click', closeQuiz);
+      testModal.addEventListener('click', (e) => {
+        if (e.target === testModal) closeQuiz();
+      });
+
+      function renderQuiz() {
+        quizAnswered = false;
+        quizFeedback.classList.add('hidden');
+        quizNextBtn.classList.add('opacity-50', 'pointer-events-none');
+        quizSummaryBox.classList.add('hidden');
+        quizOptions.classList.remove('hidden');
+
+        const total = PRESENTATION.quiz.length;
+        const q = PRESENTATION.quiz[quizIdx];
+
+        quizCounter.textContent = `${quizIdx + 1} / ${total}`;
+        quizQuestion.textContent = q.question;
+        quizProgressBar.style.width = `${((quizIdx + 1) / total) * 100}%`;
+
+        quizJumpSlideBtn.onclick = () => {
+          closeQuiz();
+          goToSlide(q.slideRef);
+        };
+
+        quizOptions.innerHTML = '';
+        q.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'w-full text-left p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs sm:text-sm text-slate-200 transition-all flex items-center justify-between';
+          btn.innerHTML = `
+            <span>${opt}</span>
+            <span class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-[10px] text-slate-400 font-mono">
+              ${String.fromCharCode(65 + idx)}
+            </span>
+          `;
+          btn.addEventListener('click', () => {
+            if (quizAnswered) return;
+            handleAnswer(idx, q);
+          });
+          quizOptions.appendChild(btn);
+        });
+      }
+
+      function handleAnswer(selectedIdx, q) {
+        quizAnswered = true;
+        quizNextBtn.classList.remove('opacity-50', 'pointer-events-none');
+
+        const isCorrect = selectedIdx === q.correct;
+        if (isCorrect) quizScore++;
+
+        const optionButtons = quizOptions.querySelectorAll('button');
+        optionButtons.forEach((btn, idx) => {
+          if (idx === q.correct) {
+            btn.className = 'w-full text-left p-3 rounded-xl border border-emerald-500 bg-emerald-500/20 text-xs sm:text-sm text-emerald-200 font-semibold flex items-center justify-between';
+          } else if (idx === selectedIdx && !isCorrect) {
+            btn.className = 'w-full text-left p-3 rounded-xl border border-rose-500 bg-rose-500/20 text-xs sm:text-sm text-rose-200 flex items-center justify-between';
+          } else {
+            btn.classList.add('opacity-40');
+          }
+        });
+
+        quizFeedback.classList.remove('hidden');
+        if (isCorrect) {
+          quizFeedback.className = 'p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs';
+          quizFeedback.innerHTML = `<strong>¡Correcto!</strong> <p class="mt-0.5 text-slate-300">${q.explanation}</p>`;
+        } else {
+          quizFeedback.className = 'p-3.5 rounded-2xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs';
+          quizFeedback.innerHTML = `<strong>Incorrecto.</strong> <p class="mt-0.5 text-slate-300">${q.explanation}</p>`;
+        }
+      }
+
+      quizNextBtn.addEventListener('click', () => {
+        if (quizIdx < PRESENTATION.quiz.length - 1) {
+          quizIdx++;
+          renderQuiz();
+        } else {
+          showQuizSummary();
+        }
+      });
+
+      function showQuizSummary() {
+        quizOptions.classList.add('hidden');
+        quizFeedback.classList.add('hidden');
+        quizNextBtn.classList.add('hidden');
+        quizJumpSlideBtn.classList.add('hidden');
+        quizSummaryBox.classList.remove('hidden');
+
+        const total = PRESENTATION.quiz.length;
+        const pct = Math.round((quizScore / total) * 100);
+        quizScoreReport.textContent = `Has acertado ${quizScore} de ${total} preguntas (${pct}%). ${
+          pct >= 70 ? '¡Excelente! Tienes muy claro el temario.' : 'Te sugerimos repasar las diapositivas.'
+        }`;
+      }
+
+      quizRestartBtn.addEventListener('click', () => {
+        quizIdx = 0;
+        quizScore = 0;
+        quizNextBtn.classList.remove('hidden');
+        quizJumpSlideBtn.classList.remove('hidden');
+        renderQuiz();
+      });
+
+      // Initial Slide
+      goToSlide(1);
+    });
+  </script>
+</body>
+</html>

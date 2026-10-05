@@ -1,0 +1,13 @@
+# Scratch & temporary extraction files
+extracted_slides.json
+slides_summary.txt
+slide_images_map.json
+full_slide_catalog.txt
+extracted_media/
+slides_rendered/
+inspect_slides.py
+catalog.py
+export_slides.ps1
+__pycache__/
+*.pyc
+.DS_Store
